@@ -4,13 +4,16 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
+import se233.chapter2.controller.FetchData;
 import se233.chapter2.controller.Initialize;
 import se233.chapter2.controller.RefreshTask;
 import se233.chapter2.model.Currency;
+import se233.chapter2.model.CurrencyEntity;
 import se233.chapter2.view.CurrencyPane;
 import se233.chapter2.view.CurrencyParentPane;
 import se233.chapter2.view.TopPane;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -51,6 +54,20 @@ public class Launcher extends Application {
         primaryStage. sizeToScene();
     }
 
+    public static void reloadCurrencyList() {
+        List<Currency> newList = new ArrayList<>();
+        for (Currency c : currencyList) {
+            Currency cc = new Currency(c.getShortCode());
+            List<CurrencyEntity> cList = FetchData.fetchRange(cc.getShortCode(), 30);
+            cc.setHistorical(cList);
+            cc.setCurrent(cList.get(cList.size() - 1));
+            cc.setWatch(c.getWatch());
+            cc.setWatchRate(c.getWatchRate());
+            newList.add(cc);
+        }
+        setCurrencyList(newList);
+    }
+
     public static List<Currency> getCurrencyList() {
         return currencyList;
     }
@@ -85,6 +102,20 @@ public class Launcher extends Application {
 
     public static Stage getPrimaryStage() {
         return primaryStage;
+    }
+
+    private static String baseCurrency = "THB";
+
+    public static String getBaseCurrency() {
+        return baseCurrency;
+    }
+
+    public static void setBaseCurrency(String newBase) {
+        baseCurrency = newBase;
+    }
+
+    public static void refreshAllCurrencyData() {
+
     }
 
     public static void setPrimaryStage(Stage primaryStage) {

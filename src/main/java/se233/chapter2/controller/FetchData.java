@@ -2,6 +2,7 @@ package se233.chapter2.controller;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
+import se233.chapter2.Launcher;
 import se233.chapter2.model.CurrencyEntity;
 
 import java.io.IOException;
@@ -20,7 +21,12 @@ public class FetchData {
     public static List<CurrencyEntity> fetchRange(String symbol, int N) {
         String dateEnd = LocalDate.now().format(formatter);
         String dateStart = LocalDate.now().minusDays(N).format(formatter);
-        String urlStr = String.format("https://cmu.to/SE233currencyapi?base=THB&symbol=%s&start_date=%s&end_date=%s", symbol, dateStart, dateEnd);
+
+        String baseCurrency = Launcher.getBaseCurrency();
+        String urlStr = String.format(
+                "https://cmu.to/SE233currencyapi?base=%s&symbol=%s&start_date=%s&end_date=%s",baseCurrency, symbol, dateStart, dateEnd
+        );
+
         List<CurrencyEntity> histList = new ArrayList<>();
         try {
             String retrievedJson = IOUtils.toString(new URL(urlStr), Charset.defaultCharset());

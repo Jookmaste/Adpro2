@@ -11,9 +11,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import se233.chapter2.controller.AllEventHandlers;
+import se233.chapter2.controller.FetchData;
 import se233.chapter2.controller.draw.DrawGraphTask;
 import se233.chapter2.model.Currency;
+import se233.chapter2.model.CurrencyEntity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,9 +26,11 @@ import java.util.concurrent.FutureTask;
 public class CurrencyPane extends BorderPane {
     private Currency currency;
     private Button watch;
+    private Button unwatch;
     private Button delete;
     public CurrencyPane(Currency currency) {
         this.watch = new Button("Watch");
+        this.unwatch = new Button("UnWatch");
         this.delete = new Button("Delete");
         this.watch. setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -36,6 +42,12 @@ public class CurrencyPane extends BorderPane {
             @Override
             public void handle(ActionEvent event) {
                 AllEventHandlers.onDelete(currency.getShortCode());
+            }
+        });
+        this.unwatch. setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                AllEventHandlers.onUnwatch(currency.getShortCode());
             }
         });
         this.setPadding(new Insets(0));
@@ -73,6 +85,8 @@ public class CurrencyPane extends BorderPane {
             exchangeString.setText(String.format("%s: %.4f", this.currency.getShortCode(), this.currency.getCurrent().getRate()));
             if (this.currency.getWatch() == true) {
                 watchString.setText(String.format("(Watch @%.4f)", this.currency.getWatchRate()));
+            } else {
+                watchString.setText("");
             }
         }
         currencyInfoPane.getChildren().addAll(exchangeString, watchString);
@@ -81,7 +95,7 @@ public class CurrencyPane extends BorderPane {
     private HBox genTopArea() {
         HBox topArea = new HBox(10);
         topArea.setPadding(new Insets(5));
-        topArea.getChildren().addAll(watch, delete);
+        topArea.getChildren().addAll(watch, unwatch, delete);
         ((HBox) topArea).setAlignment(Pos.CENTER_RIGHT);
         return topArea;
     }
