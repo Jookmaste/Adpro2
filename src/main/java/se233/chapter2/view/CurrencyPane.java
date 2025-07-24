@@ -12,16 +12,15 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import se233.chapter2.controller.AllEventHandlers;
 import se233.chapter2.controller.FetchData;
+import se233.chapter2.controller.draw.DrawCurrencyInfoTask;
 import se233.chapter2.controller.draw.DrawGraphTask;
+import se233.chapter2.controller.draw.DrawTopAreaTask;
 import se233.chapter2.model.Currency;
 import se233.chapter2.model.CurrencyEntity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.*;
 
 public class CurrencyPane extends BorderPane {
     private Currency currency;
@@ -63,15 +62,30 @@ public class CurrencyPane extends BorderPane {
     }
     public void refreshPane(Currency currency) throws ExecutionException,InterruptedException {
         this.currency = currency;
-        Pane currencyInfo = genInfoPane();
-        FutureTask futureTask = new FutureTask<VBox>(new DrawGraphTask(currency));
-        ExecutorService executor = Executors. newSingleThreadExecutor();
-        executor.execute(futureTask);
-        VBox currencyGraph = (VBox) futureTask.get();
-        Pane topArea = genTopArea();
+
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+
+        Future<Pane> infoFuture = executor.submit(new DrawCurrencyInfoTask(currency));
+        Future<HBox> topFuture = executor.submit(new DrawTopAreaTask(watch, unwatch, delete));
+        Future<VBox> graphFuture = executor.submit(new DrawGraphTask(currency));
+
+//        Pane currencyInfo = genInfoPane();
+//        ExecutorService executor = Executors. newSingleThreadExecutor();
+//        executor.execute(futureTask);
+//        VBox currencyGraph = (VBox) futureTask.get();
+//        Pane topArea = genTopArea();
+
+        Pane currencyInfo = infoFuture.get();
+        HBox topArea = topFuture.get();
+        VBox currencyGraph = graphFuture.get();
+
+
         this.setTop(topArea);
         this.setLeft(currencyInfo);
         this.setCenter(currencyGraph);
+
+        executor.shutdown();
+
     }
     private Pane genInfoPane() {
         VBox currencyInfoPane = new VBox(10);
