@@ -10,8 +10,13 @@ import se233.chapter2.model.CurrencyEntity;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AllEventHandlers {
+
+    private static final Logger logger = LoggerFactory.getLogger(AllEventHandlers.class);
+
     public static void onRefresh() {
         try {
             Launcher.reloadCurrencyList();
@@ -35,9 +40,14 @@ public class AllEventHandlers {
                 c.setHistorical(cList);
                 c.setCurrent(cList.get(cList.size() - 1));
                 currencyList.add(c);
+
+                logger.info( "Add : {} \n", c.getShortCode());
+
                 Launcher.setCurrencyList(currencyList);
                 Launcher.refreshPane();
             }
+
+
         } catch (Exception e){
             Alert alert = new Alert(AlertType.ERROR);
             alert.setTitle("Wrong input");
@@ -59,7 +69,11 @@ public class AllEventHandlers {
                 }
             }
             if (index != -1) {
+
                 currencyList.remove(index);
+
+                logger.info( "Delete : {} \n", code);
+
                 Launcher.setCurrencyList(currencyList);
                 Launcher.refreshPane();
             }
@@ -69,6 +83,7 @@ public class AllEventHandlers {
             e.printStackTrace();
         }
     }
+
     public static void onWatch(String code) {
         try {
             List<Currency> currencyList = Launcher.getCurrencyList();
